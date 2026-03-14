@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { Project, Update } from '@/lib/types'
 import PledgeForm from './PledgeForm'
+import ReturnSimulator from './ReturnSimulator'
 
 function ProgressBar({ current, goal }: { current: number; goal: number }) {
   const pct = Math.min(Math.round((current / goal) * 100), 100)
@@ -34,7 +35,7 @@ export default async function ProjectDetailPage({
   const [{ data: project }, { data: { user } }, { data: updates }] = await Promise.all([
     supabase
       .from('projects')
-      .select('*, profiles(display_name)')
+      .select('*, profiles(display_name, bio)')
       .eq('id', id)
       .single(),
     supabase.auth.getUser(),
@@ -85,6 +86,38 @@ export default async function ProjectDetailPage({
             <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">{p.description}</p>
           </div>
 
+          {/* 起業家情報 */}
+          <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-5">
+            <h2 className="font-semibold text-lg">起業家情報</h2>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-base font-bold text-green-600 shrink-0">
+                {(p.profiles as any)?.display_name?.[0]?.toUpperCase() ?? '?'}
+              </div>
+              <p className="font-medium text-gray-900">{(p.profiles as any)?.display_name ?? '匿名'}</p>
+            </div>
+            {(p.profiles as any)?.bio && (
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">自己紹介</p>
+                <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{(p.profiles as any).bio}</p>
+              </div>
+            )}
+            {p.entrepreneur_motivation && (
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">この事業をやる動機</p>
+                <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{p.entrepreneur_motivation}</p>
+              </div>
+            )}
+            {p.entrepreneur_track_record && (
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">これまでの実績・経歴</p>
+                <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{p.entrepreneur_track_record}</p>
+              </div>
+            )}
+            {!(p.profiles as any)?.bio && !p.entrepreneur_motivation && !p.entrepreneur_track_record && (
+              <p className="text-sm text-gray-400">起業家情報は未入力です</p>
+            )}
+          </div>
+
           {/* リターン条件 */}
           <div className="bg-white rounded-2xl border border-gray-200 p-6">
             <h2 className="font-semibold text-lg mb-4">リターン条件</h2>
@@ -106,6 +139,13 @@ export default async function ProjectDetailPage({
               売上の {p.revenue_share_rate}% を {p.return_period_years} 年間にわたって支援者に還元します。還元総額は支援額の最大 {p.return_cap_multiplier} 倍までです。
             </p>
           </div>
+
+          {/* リターンシミュレーター */}
+          <ReturnSimulator
+            revenueShareRate={p.revenue_share_rate}
+            returnPeriodYears={p.return_period_years}
+            returnCapMultiplier={p.return_cap_multiplier}
+          />
 
           {/* 進捗報告 */}
           <div className="bg-white rounded-2xl border border-gray-200 p-6">

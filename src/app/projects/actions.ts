@@ -33,6 +33,8 @@ export async function createProject(formData: FormData) {
       revenue_share_rate: revenueShareRate,
       return_period_years: returnPeriodYears,
       return_cap_multiplier: returnCapMultiplier,
+      entrepreneur_motivation: (formData.get('entrepreneur_motivation') as string) || null,
+      entrepreneur_track_record: (formData.get('entrepreneur_track_record') as string) || null,
     })
     .select('id')
     .single()

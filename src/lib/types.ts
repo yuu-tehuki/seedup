@@ -23,6 +23,8 @@ export type Project = {
   revenue_share_rate: number
   return_period_years: number
   return_cap_multiplier: number
+  entrepreneur_motivation: string | null
+  entrepreneur_track_record: string | null
   created_at: string
   updated_at: string
   profiles?: Profile

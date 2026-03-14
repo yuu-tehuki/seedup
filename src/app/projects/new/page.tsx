@@ -102,6 +102,47 @@ export default function NewProjectPage() {
           <p className="text-xs text-gray-400 mt-1">7日以降の日付を選択してください</p>
         </div>
 
+        {/* 起業家情報 */}
+        <div className="border-t border-gray-100 pt-6">
+          <h2 className="text-sm font-semibold text-gray-700 mb-4">起業家情報</h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                自己紹介
+              </label>
+              <textarea
+                name="bio_hint"
+                rows={3}
+                disabled
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg bg-gray-50 text-gray-400 text-sm resize-none"
+                placeholder="自己紹介はマイページのプロフィールから設定できます"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                この事業をやる動機
+              </label>
+              <textarea
+                name="entrepreneur_motivation"
+                rows={4}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
+                placeholder="なぜこの事業に取り組むのか、背景や想いを書いてください"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                これまでの実績・経歴
+              </label>
+              <textarea
+                name="entrepreneur_track_record"
+                rows={4}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
+                placeholder="過去の仕事・事業・受賞歴・学歴など、信頼性につながる情報を書いてください"
+              />
+            </div>
+          </div>
+        </div>
+
         {/* リターン条件 */}
         <div className="border-t border-gray-100 pt-6">
           <h2 className="text-sm font-semibold text-gray-700 mb-4">リターン条件</h2>
