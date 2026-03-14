@@ -8,7 +8,14 @@ import { CATEGORIES } from '@/lib/types'
 export default function NewProjectPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [preview, setPreview] = useState<string | null>(null)
   const router = useRouter()
+
+  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setPreview(URL.createObjectURL(file))
+  }
 
   const minDeadline = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
     .toISOString()
@@ -29,6 +36,46 @@ export default function NewProjectPage() {
       <h1 className="text-2xl font-bold mb-8">プロジェクトを投稿する</h1>
 
       <form action={handleSubmit} className="bg-white rounded-2xl border border-gray-200 p-8 space-y-6">
+
+        {/* メイン画像 */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">メイン画像</label>
+          <label
+            htmlFor="thumbnail-input"
+            className="block w-full h-48 rounded-xl border-2 border-dashed border-gray-300 hover:border-green-400 transition-colors cursor-pointer overflow-hidden bg-gray-50"
+          >
+            {preview ? (
+              <img src={preview} alt="プレビュー" className="w-full h-full object-cover" />
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full gap-2 text-gray-400">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span className="text-sm">クリックして画像を選択</span>
+                <span className="text-xs">JPG・PNG・WebP・GIF / 最大5MB</span>
+              </div>
+            )}
+          </label>
+          <input
+            id="thumbnail-input"
+            name="thumbnail"
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            className="hidden"
+            onChange={handleImageChange}
+          />
+          {preview && (
+            <button
+              type="button"
+              onClick={() => { setPreview(null); (document.getElementById('thumbnail-input') as HTMLInputElement).value = '' }}
+              className="mt-1.5 text-xs text-gray-400 hover:text-red-500 transition-colors"
+            >
+              画像を削除
+            </button>
+          )}
+        </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             プロジェクト名 <span className="text-red-500">*</span>

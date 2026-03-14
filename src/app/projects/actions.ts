@@ -21,6 +21,32 @@ export async function createProject(formData: FormData) {
   const returnPeriodYears = parseInt(formData.get('return_period_years') as string, 10)
   const returnCapMultiplier = parseFloat(formData.get('return_cap_multiplier') as string)
 
+  // 画像アップロード
+  const thumbnailFile = formData.get('thumbnail') as File | null
+  let thumbnail_url: string | null = null
+
+  if (thumbnailFile && thumbnailFile.size > 0) {
+    if (thumbnailFile.size > 5 * 1024 * 1024) {
+      return { error: '画像は5MB以下にしてください' }
+    }
+    const ext = thumbnailFile.name.split('.').pop()?.toLowerCase() ?? 'jpg'
+    const filePath = `${user.id}/${Date.now()}.${ext}`
+
+    const { error: uploadError } = await supabase.storage
+      .from('project-images')
+      .upload(filePath, thumbnailFile, { contentType: thumbnailFile.type, upsert: false })
+
+    if (uploadError) {
+      return { error: '画像のアップロードに失敗しました' }
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('project-images')
+      .getPublicUrl(filePath)
+
+    thumbnail_url = publicUrl
+  }
+
   const { data, error } = await supabase
     .from('projects')
     .insert({
@@ -35,6 +61,7 @@ export async function createProject(formData: FormData) {
       return_cap_multiplier: returnCapMultiplier,
       entrepreneur_motivation: (formData.get('entrepreneur_motivation') as string) || null,
       entrepreneur_track_record: (formData.get('entrepreneur_track_record') as string) || null,
+      thumbnail_url,
     })
     .select('id')
     .single()
