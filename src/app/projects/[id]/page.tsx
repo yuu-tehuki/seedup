@@ -85,6 +85,28 @@ export default async function ProjectDetailPage({
             <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">{p.description}</p>
           </div>
 
+          {/* リターン条件 */}
+          <div className="bg-white rounded-2xl border border-gray-200 p-6">
+            <h2 className="font-semibold text-lg mb-4">リターン条件</h2>
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="bg-green-50 rounded-xl p-4">
+                <p className="text-2xl font-bold text-green-600">{p.revenue_share_rate}%</p>
+                <p className="text-xs text-gray-500 mt-1">売上還元率</p>
+              </div>
+              <div className="bg-green-50 rounded-xl p-4">
+                <p className="text-2xl font-bold text-green-600">{p.return_period_years}年</p>
+                <p className="text-xs text-gray-500 mt-1">還元期間</p>
+              </div>
+              <div className="bg-green-50 rounded-xl p-4">
+                <p className="text-2xl font-bold text-green-600">{p.return_cap_multiplier}倍</p>
+                <p className="text-xs text-gray-500 mt-1">リターン上限</p>
+              </div>
+            </div>
+            <p className="text-xs text-gray-400 mt-3 leading-relaxed">
+              売上の {p.revenue_share_rate}% を {p.return_period_years} 年間にわたって支援者に還元します。還元総額は支援額の最大 {p.return_cap_multiplier} 倍までです。
+            </p>
+          </div>
+
           {/* 進捗報告 */}
           <div className="bg-white rounded-2xl border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-4">

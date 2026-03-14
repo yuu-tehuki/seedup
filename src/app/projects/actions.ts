@@ -17,6 +17,10 @@ export async function createProject(formData: FormData) {
     return { error: '目標金額を正しく入力してください' }
   }
 
+  const revenueShareRate = parseFloat(formData.get('revenue_share_rate') as string)
+  const returnPeriodYears = parseInt(formData.get('return_period_years') as string, 10)
+  const returnCapMultiplier = parseFloat(formData.get('return_cap_multiplier') as string)
+
   const { data, error } = await supabase
     .from('projects')
     .insert({
@@ -26,6 +30,9 @@ export async function createProject(formData: FormData) {
       goal_amount: goalAmount,
       category: formData.get('category') as string,
       deadline: formData.get('deadline') as string,
+      revenue_share_rate: revenueShareRate,
+      return_period_years: returnPeriodYears,
+      return_cap_multiplier: returnCapMultiplier,
     })
     .select('id')
     .single()

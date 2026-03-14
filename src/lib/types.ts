@@ -20,6 +20,9 @@ export type Project = {
   category: string
   thumbnail_url: string | null
   status: ProjectStatus
+  revenue_share_rate: number
+  return_period_years: number
+  return_cap_multiplier: number
   created_at: string
   updated_at: string
   profiles?: Profile

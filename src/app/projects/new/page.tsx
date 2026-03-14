@@ -102,6 +102,84 @@ export default function NewProjectPage() {
           <p className="text-xs text-gray-400 mt-1">7日以降の日付を選択してください</p>
         </div>
 
+        {/* リターン条件 */}
+        <div className="border-t border-gray-100 pt-6">
+          <h2 className="text-sm font-semibold text-gray-700 mb-4">リターン条件</h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                売上還元率 <span className="text-red-500">*</span>
+              </label>
+              <div className="flex items-center gap-3">
+                <input
+                  name="revenue_share_rate"
+                  type="range"
+                  required
+                  min={1}
+                  max={10}
+                  step={0.5}
+                  defaultValue={3}
+                  className="flex-1 accent-green-600"
+                  onInput={(e) => {
+                    const el = e.currentTarget
+                    el.nextElementSibling!.textContent = `${el.value}%`
+                  }}
+                />
+                <span className="w-12 text-sm font-semibold text-gray-800 text-right">3%</span>
+              </div>
+              <p className="text-xs text-gray-400 mt-1">1〜10%の範囲で設定（売上の何%を支援者に還元するか）</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                還元期間 <span className="text-red-500">*</span>
+              </label>
+              <div className="flex items-center gap-3">
+                <input
+                  name="return_period_years"
+                  type="range"
+                  required
+                  min={1}
+                  max={5}
+                  step={1}
+                  defaultValue={3}
+                  className="flex-1 accent-green-600"
+                  onInput={(e) => {
+                    const el = e.currentTarget
+                    el.nextElementSibling!.textContent = `${el.value}年`
+                  }}
+                />
+                <span className="w-12 text-sm font-semibold text-gray-800 text-right">3年</span>
+              </div>
+              <p className="text-xs text-gray-400 mt-1">1〜5年の範囲で設定（売上還元を行う期間）</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                リターン上限 <span className="text-red-500">*</span>
+              </label>
+              <div className="flex items-center gap-3">
+                <input
+                  name="return_cap_multiplier"
+                  type="range"
+                  required
+                  min={1}
+                  max={3}
+                  step={0.5}
+                  defaultValue={2}
+                  className="flex-1 accent-green-600"
+                  onInput={(e) => {
+                    const el = e.currentTarget
+                    el.nextElementSibling!.textContent = `${el.value}倍`
+                  }}
+                />
+                <span className="w-12 text-sm font-semibold text-gray-800 text-right">2倍</span>
+              </div>
+              <p className="text-xs text-gray-400 mt-1">1〜3倍の範囲で設定（支援額に対する還元総額の上限）</p>
+            </div>
+          </div>
+        </div>
+
         {error && (
           <p className="text-sm text-red-600 bg-red-50 px-4 py-2.5 rounded-lg">{error}</p>
         )}
