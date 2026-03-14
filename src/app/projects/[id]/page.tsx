@@ -35,7 +35,7 @@ export default async function ProjectDetailPage({
   const [{ data: project }, { data: { user } }, { data: updates }] = await Promise.all([
     supabase
       .from('projects')
-      .select('*, profiles(display_name, bio)')
+      .select('*, profiles(display_name, bio, motivation, track_record)')
       .eq('id', id)
       .single(),
     supabase.auth.getUser(),
@@ -101,19 +101,19 @@ export default async function ProjectDetailPage({
                 <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{(p.profiles as any).bio}</p>
               </div>
             )}
-            {p.entrepreneur_motivation && (
+            {(p.profiles as any)?.motivation && (
               <div>
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">この事業をやる動機</p>
-                <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{p.entrepreneur_motivation}</p>
+                <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{(p.profiles as any).motivation}</p>
               </div>
             )}
-            {p.entrepreneur_track_record && (
+            {(p.profiles as any)?.track_record && (
               <div>
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">これまでの実績・経歴</p>
-                <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{p.entrepreneur_track_record}</p>
+                <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{(p.profiles as any).track_record}</p>
               </div>
             )}
-            {!(p.profiles as any)?.bio && !p.entrepreneur_motivation && !p.entrepreneur_track_record && (
+            {!(p.profiles as any)?.bio && !(p.profiles as any)?.motivation && !(p.profiles as any)?.track_record && (
               <p className="text-sm text-gray-400">起業家情報は未入力です</p>
             )}
           </div>
