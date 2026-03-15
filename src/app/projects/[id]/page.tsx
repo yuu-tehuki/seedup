@@ -1,8 +1,9 @@
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { Project, Update } from '@/lib/types'
+import { Project, Update, Report } from '@/lib/types'
 import PledgeForm from './PledgeForm'
 import ReturnSimulator from './ReturnSimulator'
+import ReportModal from './ReportModal'
 
 function ProgressBar({ current, goal }: { current: number; goal: number }) {
   const pct = Math.min(Math.round((current / goal) * 100), 100)
@@ -32,7 +33,7 @@ export default async function ProjectDetailPage({
   const { id } = await params
   const supabase = await createClient()
 
-  const [{ data: project }, { data: { user } }, { data: updates }] = await Promise.all([
+  const [{ data: project }, { data: { user } }, { data: updates }, { data: reports }] = await Promise.all([
     supabase
       .from('projects')
       .select('*, profiles(display_name, bio, motivation, track_record)')
@@ -41,6 +42,11 @@ export default async function ProjectDetailPage({
     supabase.auth.getUser(),
     supabase
       .from('updates')
+      .select('*')
+      .eq('project_id', id)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('reports')
       .select('*')
       .eq('project_id', id)
       .order('created_at', { ascending: false }),
@@ -149,28 +155,27 @@ export default async function ProjectDetailPage({
 
           {/* 進捗報告 */}
           <div className="bg-white rounded-2xl border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-5">
               <h2 className="font-semibold text-lg">進捗報告</h2>
-              {isOwner && (
-                <a
-                  href={`/projects/${p.id}/updates/new`}
-                  className="text-sm text-green-600 hover:underline"
-                >
-                  + 報告を投稿
-                </a>
-              )}
+              {isOwner && <ReportModal projectId={p.id} />}
             </div>
-            {!updates || updates.length === 0 ? (
-              <p className="text-gray-400 text-sm">まだ進捗報告はありません</p>
+            {!reports || reports.length === 0 ? (
+              <div className="text-center py-8 text-gray-400">
+                <svg className="w-8 h-8 mx-auto mb-2 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <p className="text-sm">まだ進捗報告はありません</p>
+              </div>
             ) : (
-              <div className="space-y-4">
-                {(updates as Update[]).map((u) => (
-                  <div key={u.id} className="border-l-2 border-green-400 pl-4">
-                    <p className="font-medium text-sm">{u.title}</p>
-                    <p className="text-xs text-gray-400 mb-1">
-                      {new Date(u.created_at).toLocaleDateString('ja-JP')}
+              <div className="space-y-5">
+                {(reports as Report[]).map((r) => (
+                  <div key={r.id} className="border-l-2 border-green-400 pl-4">
+                    <p className="font-semibold text-sm text-gray-900">{r.title}</p>
+                    <p className="text-xs text-gray-400 mt-0.5 mb-2">
+                      {new Date(r.created_at).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' })}
                     </p>
-                    <p className="text-sm text-gray-700 whitespace-pre-wrap">{u.body}</p>
+                    <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{r.body}</p>
                   </div>
                 ))}
               </div>

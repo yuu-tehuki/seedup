@@ -48,6 +48,14 @@ export type Update = {
   created_at: string
 }
 
+export type Report = {
+  id: string
+  project_id: string
+  title: string
+  body: string
+  created_at: string
+}
+
 export const CATEGORIES = [
   'テクノロジー',
   'アプリ・SaaS',
