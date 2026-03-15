@@ -1,6 +1,8 @@
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { Project } from '@/lib/types'
+import ProjectFilters from './ProjectFilters'
 
 function ProgressBar({ current, goal }: { current: number; goal: number }) {
   const pct = Math.min(Math.round((current / goal) * 100), 100)
@@ -22,17 +24,53 @@ function daysLeft(deadline: string) {
   return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)))
 }
 
-export default async function ProjectsPage() {
+function sortProjects(projects: Project[], sort: string): Project[] {
+  const arr = [...projects]
+  switch (sort) {
+    case 'deadline_asc':
+      return arr.sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime())
+    case 'deadline_desc':
+      return arr.sort((a, b) => new Date(b.deadline).getTime() - new Date(a.deadline).getTime())
+    case 'goal_asc':
+      return arr.sort((a, b) => a.goal_amount - b.goal_amount)
+    case 'goal_desc':
+      return arr.sort((a, b) => b.goal_amount - a.goal_amount)
+    case 'rate_desc':
+      return arr.sort((a, b) => b.current_amount / b.goal_amount - a.current_amount / a.goal_amount)
+    case 'rate_asc':
+      return arr.sort((a, b) => a.current_amount / a.goal_amount - b.current_amount / b.goal_amount)
+    default: // newest
+      return arr.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+  }
+}
+
+export default async function ProjectsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; category?: string; sort?: string }>
+}) {
+  const { q, category, sort = 'newest' } = await searchParams
+
   const supabase = await createClient()
-  const { data: projects } = await supabase
+  let query = supabase
     .from('projects')
     .select('*, profiles(display_name)')
     .eq('status', 'active')
-    .order('created_at', { ascending: false })
+
+  if (q?.trim()) {
+    const escaped = q.trim().replace(/[%_]/g, '\\$&')
+    query = query.or(`title.ilike.%${escaped}%,description.ilike.%${escaped}%`)
+  }
+  if (category) {
+    query = query.eq('category', category)
+  }
+
+  const { data } = await query
+  const projects = sortProjects((data as Project[]) ?? [], sort)
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-10">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">プロジェクト一覧</h1>
         <Link
           href="/projects/new"
@@ -42,16 +80,30 @@ export default async function ProjectsPage() {
         </Link>
       </div>
 
-      {!projects || projects.length === 0 ? (
+      {/* フィルターUIは useSearchParams を使うので Suspense でラップが必要 */}
+      <Suspense fallback={<div className="h-24 bg-white rounded-2xl border border-gray-200 mb-6 animate-pulse" />}>
+        <ProjectFilters total={projects.length} />
+      </Suspense>
+
+      {projects.length === 0 ? (
         <div className="text-center py-20 text-gray-400">
-          <p className="text-lg mb-4">まだプロジェクトがありません</p>
-          <Link href="/projects/new" className="text-green-600 hover:underline">
-            最初のプロジェクトを投稿する
-          </Link>
+          {q || category ? (
+            <>
+              <p className="text-lg mb-2">条件に一致するプロジェクトが見つかりませんでした</p>
+              <p className="text-sm">検索条件を変えてお試しください</p>
+            </>
+          ) : (
+            <>
+              <p className="text-lg mb-4">まだプロジェクトがありません</p>
+              <Link href="/projects/new" className="text-green-600 hover:underline">
+                最初のプロジェクトを投稿する
+              </Link>
+            </>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {(projects as Project[]).map((project) => (
+          {projects.map((project) => (
             <Link
               key={project.id}
               href={`/projects/${project.id}`}
