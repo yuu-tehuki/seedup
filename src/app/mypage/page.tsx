@@ -1,8 +1,9 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { Project, Pledge, Profile } from '@/lib/types'
+import { Project, Profile, Report } from '@/lib/types'
 import ProjectCard from './ProjectCard'
+import SupporterDashboard from './SupporterDashboard'
 
 export default async function MyPage() {
   const supabase = await createClient()
@@ -23,10 +24,48 @@ export default async function MyPage() {
       .order('created_at', { ascending: false }),
     supabase
       .from('pledges')
-      .select('*, projects(id, title, current_amount, goal_amount, status, deadline, category)')
+      .select('*, projects(id, title, current_amount, goal_amount, status, deadline, category, thumbnail_url, revenue_share_rate, return_period_years, return_cap_multiplier)')
       .eq('backer_id', user.id)
       .order('created_at', { ascending: false }),
   ])
+
+  // 支援済みプロジェクトIDを重複なしで取得
+  const backedProjectIds = [
+    ...new Set(
+      ((myPledges ?? []) as any[])
+        .map((p) => p.projects?.id as string)
+        .filter(Boolean)
+    ),
+  ]
+
+  // 各プロジェクトの最新進捗報告 + 未読通知を並行取得
+  const [{ data: allReports }, { data: unreadNotifs }] = await Promise.all([
+    backedProjectIds.length > 0
+      ? supabase
+          .from('reports')
+          .select('*')
+          .in('project_id', backedProjectIds)
+          .order('created_at', { ascending: false })
+      : Promise.resolve({ data: [] as Report[] }),
+    supabase
+      .from('notifications')
+      .select('link')
+      .eq('user_id', user.id)
+      .eq('is_read', false),
+  ])
+
+  // project_id ごとに最新1件だけ保持
+  const latestReports: Record<string, Report> = {}
+  for (const report of (allReports ?? []) as Report[]) {
+    if (!latestReports[report.project_id]) {
+      latestReports[report.project_id] = report
+    }
+  }
+
+  // 未読通知のリンクからプロジェクトIDを抽出
+  const unreadProjectIds = ((unreadNotifs ?? []) as { link: string }[])
+    .map((n) => n.link.match(/\/projects\/([a-f0-9-]+)/)?.[1] ?? null)
+    .filter((id): id is string => id !== null)
 
   const p = profile as Profile | null
 
@@ -81,43 +120,27 @@ export default async function MyPage() {
         )}
       </section>
 
-      {/* 支援したプロジェクト */}
+      {/* 応援者ダッシュボード */}
       <section>
-        <h2 className="text-lg font-bold mb-4">支援したプロジェクト</h2>
+        <div className="flex items-center gap-3 mb-4">
+          <h2 className="text-lg font-bold">応援中のプロジェクト</h2>
+          {myPledges && myPledges.length > 0 && (
+            <span className="text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium">
+              {myPledges.length}件
+            </span>
+          )}
+          {unreadProjectIds.length > 0 && (
+            <span className="text-xs bg-red-500 text-white px-2.5 py-0.5 rounded-full font-bold">
+              {unreadProjectIds.length}件の新着
+            </span>
+          )}
+        </div>
 
-        {!myPledges || myPledges.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center text-gray-400">
-            <p className="mb-3">まだ支援したプロジェクトはありません</p>
-            <Link href="/projects" className="text-green-600 hover:underline text-sm">
-              プロジェクトを探す
-            </Link>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {(myPledges as (Pledge & { projects: any })[]).map((pledge) => (
-              <Link
-                key={pledge.id}
-                href={`/projects/${pledge.projects?.id}`}
-                className="bg-white rounded-2xl border border-gray-200 p-5 flex items-center justify-between hover:shadow-md transition-shadow block"
-              >
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full font-medium shrink-0">
-                      {pledge.projects?.category}
-                    </span>
-                    <h3 className="font-semibold text-gray-900 truncate">{pledge.projects?.title}</h3>
-                  </div>
-                  <p className="text-xs text-gray-400">
-                    {new Date(pledge.created_at).toLocaleDateString('ja-JP')} に支援
-                  </p>
-                </div>
-                <div className="shrink-0 ml-4 text-right">
-                  <p className="font-bold text-gray-900">¥{pledge.amount.toLocaleString()}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
+        <SupporterDashboard
+          pledges={(myPledges ?? []) as any}
+          latestReports={latestReports}
+          unreadProjectIds={unreadProjectIds}
+        />
       </section>
     </div>
   )
