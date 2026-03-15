@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { logout } from '@/app/auth/actions'
+import NotificationBell from './NotificationBell'
 
 export default async function Header() {
   const supabase = await createClient()
@@ -29,6 +30,7 @@ export default async function Header() {
               <Link href="/mypage" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
                 マイページ
               </Link>
+              <NotificationBell userId={user.id} />
               <form action={logout}>
                 <button type="submit" className="text-sm text-gray-500 hover:text-gray-700 transition-colors">
                   ログアウト
