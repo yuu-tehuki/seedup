@@ -2,26 +2,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Project, Pledge, Profile } from '@/lib/types'
-
-function ProgressBar({ current, goal }: { current: number; goal: number }) {
-  const pct = Math.min(Math.round((current / goal) * 100), 100)
-  return (
-    <div>
-      <div className="w-full bg-gray-100 rounded-full h-2 mb-1">
-        <div className="bg-green-500 h-2 rounded-full" style={{ width: `${pct}%` }} />
-      </div>
-      <div className="flex justify-between text-xs text-gray-500">
-        <span>{pct}% 達成</span>
-        <span>目標 ¥{goal.toLocaleString()}</span>
-      </div>
-    </div>
-  )
-}
-
-function daysLeft(deadline: string) {
-  const diff = new Date(deadline).getTime() - Date.now()
-  return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)))
-}
+import ProjectCard from './ProjectCard'
 
 export default async function MyPage() {
   const supabase = await createClient()
@@ -94,38 +75,7 @@ export default async function MyPage() {
         ) : (
           <div className="space-y-4">
             {(myProjects as Project[]).map((project) => (
-              <Link
-                key={project.id}
-                href={`/projects/${project.id}`}
-                className="bg-white rounded-2xl border border-gray-200 p-5 flex gap-4 hover:shadow-md transition-shadow block"
-              >
-                <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-2xl shrink-0 overflow-hidden">
-                  {project.thumbnail_url ? (
-                    <img src={project.thumbnail_url} alt={project.title} className="w-full h-full object-cover" />
-                  ) : (
-                    '🌱'
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-2 mb-1">
-                    <h3 className="font-semibold text-gray-900 truncate">{project.title}</h3>
-                    <span className={`text-xs px-2 py-0.5 rounded-full shrink-0 font-medium ${
-                      project.status === 'active'
-                        ? 'bg-green-50 text-green-700'
-                        : project.status === 'successful'
-                        ? 'bg-blue-50 text-blue-700'
-                        : 'bg-gray-100 text-gray-500'
-                    }`}>
-                      {project.status === 'active' ? '募集中' : project.status === 'successful' ? '成功' : project.status === 'closed' ? '終了' : '下書き'}
-                    </span>
-                  </div>
-                  <ProgressBar current={project.current_amount} goal={project.goal_amount} />
-                  <div className="flex justify-between text-xs text-gray-400 mt-2">
-                    <span>¥{project.current_amount.toLocaleString()} 支援済み</span>
-                    <span>残り {daysLeft(project.deadline)} 日</span>
-                  </div>
-                </div>
-              </Link>
+              <ProjectCard key={project.id} project={project} />
             ))}
           </div>
         )}
