@@ -7,6 +7,16 @@ export default async function Header() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
+  let role: string | null = null
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+    role = profile?.role ?? null
+  }
+
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
@@ -21,12 +31,24 @@ export default async function Header() {
 
           {user ? (
             <>
-              <Link
-                href="/projects/new"
-                className="text-sm bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-              >
-                投稿する
-              </Link>
+              {/* 起業家 or 未設定: 投稿するボタン */}
+              {role !== 'supporter' && (
+                <Link
+                  href="/projects/new"
+                  className="text-sm bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                >
+                  投稿する
+                </Link>
+              )}
+              {/* 応援者: プロジェクトを探すボタン */}
+              {role === 'supporter' && (
+                <Link
+                  href="/projects"
+                  className="text-sm bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                >
+                  プロジェクトを探す
+                </Link>
+              )}
               <Link href="/mypage" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
                 マイページ
               </Link>
