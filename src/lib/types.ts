@@ -1,5 +1,7 @@
 export type ProjectStatus = 'draft' | 'active' | 'closed' | 'successful'
 
+export type UserRole = 'entrepreneur' | 'supporter'
+
 export type Profile = {
   id: string
   display_name: string
@@ -7,6 +9,7 @@ export type Profile = {
   motivation: string | null
   track_record: string | null
   avatar_url: string | null
+  role: UserRole | null
   created_at: string
   updated_at: string
 }

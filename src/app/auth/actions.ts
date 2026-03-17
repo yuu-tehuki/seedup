@@ -26,12 +26,17 @@ export async function signup(formData: FormData) {
   const email = formData.get('email') as string
   const password = formData.get('password') as string
   const displayName = formData.get('display_name') as string
+  const role = formData.get('role') as string
+
+  if (role !== 'entrepreneur' && role !== 'supporter') {
+    return { error: '役割を選択してください' }
+  }
 
   const { error } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      data: { display_name: displayName },
+      data: { display_name: displayName, role },
     },
   })
 
@@ -43,7 +48,7 @@ export async function signup(formData: FormData) {
   }
 
   revalidatePath('/', 'layout')
-  redirect('/')
+  redirect(role === 'entrepreneur' ? '/projects/new' : '/projects')
 }
 
 export async function logout() {

@@ -81,7 +81,19 @@ export default async function MyPage() {
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2">
-            <h1 className="text-xl font-bold text-gray-900">{p?.display_name ?? '（名前未設定）'}</h1>
+            <div className="flex items-center gap-2 min-w-0">
+              <h1 className="text-xl font-bold text-gray-900 truncate">{p?.display_name ?? '（名前未設定）'}</h1>
+              {p?.role === 'entrepreneur' && (
+                <span className="shrink-0 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
+                  起業家
+                </span>
+              )}
+              {p?.role === 'supporter' && (
+                <span className="shrink-0 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
+                  応援者
+                </span>
+              )}
+            </div>
             <span className="text-xs text-green-600 font-medium group-hover:underline shrink-0">編集する →</span>
           </div>
           <p className="text-sm text-gray-500 mt-0.5">{user.email}</p>
