@@ -24,8 +24,9 @@ export default async function Header() {
           Seedup
         </Link>
 
-        <nav className="flex items-center gap-4">
-          <Link href="/projects" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+        <nav className="flex items-center gap-2 sm:gap-4">
+          {/* モバイルでは非表示 */}
+          <Link href="/projects" className="hidden sm:inline text-sm text-gray-600 hover:text-gray-900 transition-colors">
             プロジェクト一覧
           </Link>
 
@@ -35,7 +36,7 @@ export default async function Header() {
               {role !== 'supporter' && (
                 <Link
                   href="/projects/new"
-                  className="text-sm bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                  className="text-sm bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg font-medium transition-colors"
                 >
                   投稿する
                 </Link>
@@ -44,16 +45,20 @@ export default async function Header() {
               {role === 'supporter' && (
                 <Link
                   href="/projects"
-                  className="text-sm bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                  className="text-sm bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg font-medium transition-colors"
                 >
-                  プロジェクトを探す
+                  <span className="sm:hidden">探す</span>
+                  <span className="hidden sm:inline">プロジェクトを探す</span>
                 </Link>
               )}
+              {/* マイページ: 常に表示 */}
               <Link href="/mypage" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
                 マイページ
               </Link>
+              {/* 通知ベル: 常に表示 */}
               <NotificationBell userId={user.id} />
-              <form action={logout}>
+              {/* ログアウト: モバイルでは非表示 */}
+              <form action={logout} className="hidden sm:block">
                 <button type="submit" className="text-sm text-gray-500 hover:text-gray-700 transition-colors">
                   ログアウト
                 </button>
@@ -61,12 +66,12 @@ export default async function Header() {
             </>
           ) : (
             <>
-              <Link href="/login" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+              <Link href="/login" className="hidden sm:inline text-sm text-gray-600 hover:text-gray-900 transition-colors">
                 ログイン
               </Link>
               <Link
                 href="/signup"
-                className="text-sm bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                className="text-sm bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg font-medium transition-colors"
               >
                 新規登録
               </Link>
