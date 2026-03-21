@@ -68,8 +68,29 @@ export default async function MyPage() {
   const isEntrepreneur = role === 'entrepreneur' || role === null  // null = 旧ユーザーは起業家扱い
   const isSupporter = role === 'supporter'
 
+  const isProfileIncomplete = role === 'entrepreneur' && !p?.bio
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-10 space-y-8">
+
+      {/* プロフィール未完成バナー（起業家のみ） */}
+      {isProfileIncomplete && (
+        <Link
+          href="/mypage/edit"
+          className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 hover:bg-amber-100 transition-colors group"
+        >
+          <div className="w-8 h-8 rounded-full bg-amber-200 flex items-center justify-center shrink-0">
+            <svg className="w-4 h-4 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-amber-800">プロフィールを完成させましょう</p>
+            <p className="text-xs text-amber-600 mt-0.5">自己紹介を追加すると、応援者に信頼感を与えられます。</p>
+          </div>
+          <span className="text-xs text-amber-600 font-medium group-hover:underline shrink-0">入力する →</span>
+        </Link>
+      )}
 
       {/* プロフィール */}
       <Link

@@ -48,7 +48,7 @@ export async function signup(formData: FormData) {
   }
 
   revalidatePath('/', 'layout')
-  redirect(role === 'entrepreneur' ? '/projects/new' : '/projects')
+  redirect('/welcome')
 }
 
 export async function logout() {
